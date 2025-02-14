@@ -29,6 +29,6 @@ Route::post('/test', function (Request $request) {
     }
 });
 
-Route::post('/chat', [ChatbotController::class, 'chatUnauthenticated']);
+Route::post('/chat', [ChatbotController::class, 'chat']);
 
-Route::post('/chat-auth', [ChatbotController::class, 'chatAuthenticated'])->middleware('auth:sanctum');
+Route::post('/chat-auth', [ChatbotController::class, 'chatAuth'])->middleware('auth:sanctum');

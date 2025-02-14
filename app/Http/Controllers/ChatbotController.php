@@ -9,7 +9,7 @@ use App\Models\ChatHistory;
 
 class ChatbotController extends Controller
 {
-    public function chatUnauthenticated(Request $request)
+    public function chat(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'message' => 'required|string|max:1000',
@@ -38,7 +38,7 @@ class ChatbotController extends Controller
         }
     }
 
-    public function chatAuthenticated(Request $request)
+    public function chatAuth(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'message' => 'required|string|max:1000',
