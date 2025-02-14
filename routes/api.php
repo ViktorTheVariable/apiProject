@@ -21,7 +21,7 @@ Route::post('/test', function (Request $request) {
             'jsonData' => 'required|string',
         ]);
 
-        dump ($request->jsonData);
+        dump($request->jsonData);
 
         return response()->json(['response' => 'hello from backend']);
     } catch (\Exception $e) {

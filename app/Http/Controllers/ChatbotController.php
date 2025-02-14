@@ -32,7 +32,6 @@ class ChatbotController extends Controller
             } else {
                 return response()->json(['error' => 'API request failed'], $response->status());
             }
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
         }
@@ -93,10 +92,8 @@ class ChatbotController extends Controller
             } else {
                 return response()->json(['error' => 'API request failed'], $response->status());
             }
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
-
 }
