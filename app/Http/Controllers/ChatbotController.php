@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ChatHistory;
+use Illuminate\Support\Str;
 
 class ChatbotController extends Controller
 {
@@ -37,11 +38,12 @@ class ChatbotController extends Controller
         }
     }
 
+
     public function chatAuth(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'message' => 'required|string|max:1000',
-            'session_id' => 'required|string',
+            'session_id' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -52,22 +54,29 @@ class ChatbotController extends Controller
         $sessionId = $request->session_id;
 
         try {
-            $previousChats = ChatHistory::where('user_id', $userId)
-                ->where('session_id', $sessionId)
-                ->orderBy('created_at', 'asc')
-                ->get();
+            if (!$sessionId) {
+                // New conversation
+                $sessionId = (string) Str::uuid();
+                $messages = [['role' => 'user', 'content' => $request->message]];
+            } else {
+                // Existing conversation
+                $previousChats = ChatHistory::where('user_id', $userId)
+                    ->where('session_id', $sessionId)
+                    ->orderBy('created_at', 'asc')
+                    ->get();
 
-            $previousMessages = $previousChats
-                ->map(fn($chat) => [
-                    ['role' => 'user', 'content' => $chat->user_message],
-                    ['role' => 'assistant', 'content' => $chat->bot_response],
-                ])
-                ->flatten(1)
-                ->toArray();
+                $previousMessages = $previousChats
+                    ->map(fn($chat) => [
+                        ['role' => 'user', 'content' => $chat->user_message],
+                        ['role' => 'assistant', 'content' => $chat->bot_response],
+                    ])
+                    ->flatten(1)
+                    ->toArray();
 
-            $messages = array_merge($previousMessages, [
-                ['role' => 'user', 'content' => $request->message]
-            ]);
+                $messages = array_merge($previousMessages, [
+                    ['role' => 'user', 'content' => $request->message]
+                ]);
+            }
 
             $response = Http::post('http://localhost:11434/api/chat', [
                 'model' => 'mistral',
@@ -96,4 +105,5 @@ class ChatbotController extends Controller
             return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
 }
