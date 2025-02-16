@@ -11,6 +11,7 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        // Validate the incoming request
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
@@ -18,6 +19,7 @@ class AuthController extends Controller
         ]);
 
         try {
+            // Create a new user in the database if the validation passes
             User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -44,7 +46,9 @@ class AuthController extends Controller
         try {
             $user = User::where('email', $request->email)->first();
 
+            // Check if the email is correct and the provided password is correct
             if (!$user || !Hash::check($request->password, $user->password)) {
+                // if either email or password is incorrect
                 throw ValidationException::withMessages([
                     'email' => ['The provided credentials are incorrect.'],
                 ]);
@@ -52,10 +56,12 @@ class AuthController extends Controller
 
             $token = $user->CreateToken('access_token');
 
+            // if the login is successful, send access token to the user
             return response()->json([
                 'access_token' => $token->plainTextToken
             ], 200);
         } catch (\Exception $e) {
+            // if any other error occurs
             return response()->json([
                 'message' => $e->getMessage()
             ], 401);
@@ -64,7 +70,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        dump($request->user()->id);
+        // Delete all tokens associated with the user
         $request->user()->tokens()->delete();
 
         return response()->json([
